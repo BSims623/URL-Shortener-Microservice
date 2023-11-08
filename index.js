@@ -1,24 +1,36 @@
-require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
-const app = express();
+require('dotenv').config()
+require('express-async-errors')
+const cors = require('cors')
+const express = require('express')
+const connectDB = require('./db/connect')
+const shortUrlRouter = require('./routes/urls')
+const bodyParser = require('body-parser')
+const errorHandlerMiddleware = require('./middleware/error-handler')
 
-// Basic Configuration
-const port = process.env.PORT || 3000;
 
-app.use(cors());
+const app = express()
 
-app.use('/public', express.static(`${process.cwd()}/public`));
+app.use(cors())
 
-app.get('/', function(req, res) {
-  res.sendFile(process.cwd() + '/views/index.html');
-});
+app.use(express.json())
+app.use(bodyParser.urlencoded({ extended: true }))
 
-// Your first API endpoint
-app.get('/api/hello', function(req, res) {
-  res.json({ greeting: 'hello API' });
-});
 
-app.listen(port, function() {
-  console.log(`Listening on port ${port}`);
-});
+app.use(express.static('./public'))
+
+app.use('/api/shorturl', shortUrlRouter)
+
+app.use(errorHandlerMiddleware)
+
+const port = process.env.PORT || 3000
+
+const start = async () => {
+  try {
+    await connectDB(process.env['MONGO_URI'])
+    app.listen(port, console.log(`Server is listening on port ${port}...`))
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+start()
