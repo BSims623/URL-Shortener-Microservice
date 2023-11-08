@@ -29,7 +29,6 @@ const postUrl = async (req, res) => {
         return res.status(200).json(findUrl)
     } else {
         throw new InvalidUrlError("invalid url")
-        //return res.status(200).json({ "error": "invalid url" })
     }
 }
 
